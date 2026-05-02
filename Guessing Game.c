@@ -3,10 +3,21 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #define MAX_LENGTH 15
 #define MAX_STACK 10
 #define MAX_QUEUE 10
+
+// Color definitions
+#define RESET "\033[0m"
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define YELLOW "\033[1;33m"
+#define BLUE "\033[1;34m"
+#define MAGENTA "\033[1;35m"
+#define CYAN "\033[1;36m"
+#define WHITE "\033[1;37m"
 
 // --- DATA STRUCTURES GLOBAL DECLARATION ---
 char guessStack[MAX_STACK][MAX_LENGTH];
@@ -28,26 +39,24 @@ void showNextHint(char *fullWord);
 void sortNumbers(int arr[], int size);
 int linearSearch(int arr[], int size, int key);
 void printLine(char ch, int length);
+void introAnimation();
+void loadingScreen();
+void exitAnimation();
+void menuAnimation();
 
 int main() {
     int mainChoice;
     char continueChoice;
 
+    introAnimation();
+
     printLine('=', 40);
-    printf("            GUESSING GAME SYSTEM       \n");
-    printf("  (Arrays, Stack, Queue | Sort, Search)\n");
+    printf(BLUE "            GUESSING GAME SYSTEM       \n" RESET);
+    printf(YELLOW "  (Arrays, Stack, Queue | Sort, Search)\n" RESET);
     printLine('=', 40);
 
     do {
-        printf("\n");
-        printLine('-', 20);
-        printf("     MAIN MENU\n");
-        printLine('-', 20);
-        printf("1. Play NUMBER Guessing Game\n");
-        printf("2. Play WORD Guessing Game\n");
-        printf("3. EXIT\n");
-        printLine('-', 20);
-        printf("Enter your choice: ");
+        menuAnimation();
         scanf("%d", &mainChoice);
         while(getchar() != '\n');
 
@@ -55,13 +64,10 @@ int main() {
             case 1: playNumberGame(); break;
             case 2: playWordGame(); break;
             case 3: 
-                printf("\n");
-                printLine('*', 40);
-                printf("    Thank you for playing! Goodbye.\n");
-                printLine('*', 40);
+                exitAnimation();
                 return 0;
             default: 
-                printf("\nInvalid Input! Please try again.\n");
+                printf(RED "\nInvalid Input! Please try again.\n" RESET);
         }
 
         printf("\n");
@@ -72,11 +78,67 @@ int main() {
 
     } while(toupper(continueChoice) == 'Y');
 
-    printf("\n");
-    printLine('*', 40);
-    printf("        Game Over. See you next time!\n");
-    printLine('*', 40);
+    exitAnimation();
     return 0;
+}
+
+// Animation functions
+void introAnimation() {
+    printf(CYAN);
+    printf("\n");
+    printLine('*', 50);
+    printf("         WELCOME TO THE GUESSING GAME!\n");
+    printLine('*', 50);
+    printf(RESET);
+    usleep(500000); // 0.5 seconds
+    printf(YELLOW "Loading game assets...\n" RESET);
+    loadingScreen();
+    printf(GREEN "Ready to play!\n" RESET);
+    usleep(500000);
+}
+
+void loadingScreen() {
+    printf("[");
+    for(int i = 0; i < 20; i++) {
+        printf("=");
+        fflush(stdout);
+        usleep(100000); // 0.1 seconds
+    }
+    printf("] 100%%\n");
+}
+
+void menuAnimation() {
+    printf("\n");
+    printLine('-', 20);
+    printf(GREEN "     MAIN MENU\n" RESET);
+    printLine('-', 20);
+    
+    usleep(200000);
+    printf(CYAN "1. Play NUMBER Guessing Game\n" RESET);
+    usleep(200000);
+    printf(MAGENTA "2. Play WORD Guessing Game\n" RESET);
+    usleep(200000);
+    printf(RED "3. EXIT\n" RESET);
+    usleep(200000);
+    printLine('-', 20);
+    printf("Enter your choice: ");
+}
+
+void exitAnimation() {
+    printf(RED);
+    printf("\n");
+    printLine('*', 50);
+    printf("         THANK YOU FOR PLAYING!\n");
+    printLine('*', 50);
+    printf(RESET);
+    usleep(500000);
+    printf(MAGENTA "Shutting down...\n" RESET);
+    for(int i = 0; i < 5; i++) {
+        printf(".");
+        fflush(stdout);
+        usleep(200000);
+    }
+    printf("\n" GREEN "Goodbye!\n" RESET);
 }
 
 // Helper function to print lines
@@ -99,7 +161,7 @@ void playNumberGame() {
 
     printf("\n");
     printLine('=', 30);
-    printf("     NUMBER GUESSING GAME\n");
+    printf(CYAN "     NUMBER GUESSING GAME\n" RESET);
     printLine('=', 30);
     printf("Guess a number between 1 and 10.\n");
 
@@ -113,7 +175,7 @@ void playNumberGame() {
         attempts++;
 
         if(linearSearch(numbers, 10, userGuess) == -1){
-            printf("Please enter a number within range 1-10!\n");
+            printf(RED "Please enter a number within range 1-10!\n" RESET);
             continue;
         }
 
@@ -121,16 +183,16 @@ void playNumberGame() {
         push(tempStr);
 
         if (userGuess == secretNum) {
-            printf("\n CORRECT! The secret number was [%d]\n", secretNum);
+            printf(GREEN "\n CORRECT! The secret number was [%d]\n" RESET, secretNum);
             printf(" Total Attempts: %d\n", attempts);
             displayHistory();
             found = 1;
         } 
         else if (userGuess < secretNum) {
-            printf("Too LOW! Try higher.\n");
+            printf(YELLOW "Too LOW! Try higher.\n" RESET);
         } 
         else {
-            printf("Too HIGH! Try lower.\n");
+            printf(YELLOW "Too HIGH! Try lower.\n" RESET);
         }
     }
 }
@@ -152,7 +214,7 @@ void playWordGame() {
 
     printf("\n");
     printLine('=', 30);
-    printf("WORD GUESSING GAME\n");
+    printf(CYAN "WORD GUESSING GAME\n" RESET);
     printLine('=', 30);
     printf("Select Category:\n");
     printf("1. Fruits\n2. Animals\n3. Countries\n4. Vegetables\n");
@@ -165,10 +227,10 @@ void playWordGame() {
         case 2: wordList = animals; wordCount = 10; strcpy(categoryName, "ANIMALS"); break;
         case 3: wordList = countries; wordCount = 10; strcpy(categoryName, "COUNTRIES"); break;
         case 4: wordList = vegetables; wordCount = 10; strcpy(categoryName, "VEGETABLES"); break;
-        default: printf("Invalid Category!\n"); return;
+        default: printf(RED "Invalid Category!\n" RESET); return;
     }
 
-    printf("\nCategory Selected: [%s]\n", categoryName);
+    printf(GREEN "\nCategory Selected: [%s]\n" RESET, categoryName);
 
     char userInput[MAX_LENGTH];
     int secretIndex, attempts = 0;
@@ -192,13 +254,13 @@ void playWordGame() {
         push(userInput);
 
         if (strcmp(userInput, wordList[secretIndex]) == 0) {
-            printf("\nCORRECT! The secret word was [%s]\n", wordList[secretIndex]);
+            printf(GREEN "\nCORRECT! The secret word was [%s]\n" RESET, wordList[secretIndex]);
             printf("Total Attempts: %d\n", attempts);
             displayHistory();
             found = 1;
         } 
         else {
-            printf("WRONG GUESS! ");
+            printf(RED "WRONG GUESS! " RESET);
             showNextHint(wordList[secretIndex]);
         }
     }
@@ -217,10 +279,10 @@ void showHint(char *revealedPart, char *fullWord) {
     int len = strlen(fullWord);
     int revealedLen = strlen(revealedPart);
     
-    printf("Hint: ");
+    printf(YELLOW "Hint: " RESET);
     for(int i = 0; i < len; i++) {
         if(i < revealedLen) {
-            printf("%c ", fullWord[i]);
+            printf(GREEN "%c " RESET, fullWord[i]);
         } else {
             printf("_ ");
         }
@@ -239,7 +301,7 @@ void push(char *item) {
 }
 
 void displayHistory() {
-    printf("\nYour Guess History: ");
+    printf(BLUE "\nYour Guess History: " RESET);
     for(int i = stackTop; i >= 0; i--) {
         printf("[%s] ", guessStack[i]);
     }
